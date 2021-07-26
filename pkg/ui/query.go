@@ -77,6 +77,8 @@ func (q *Query) Register(r *route.Router, ins extpromhttp.InstrumentationMiddlew
 		http.Redirect(w, r, path.Join("/", GetWebPrefix(q.logger, q.externalPrefix, q.prefixHeader, r), p)+"?"+r.URL.RawQuery, http.StatusFound)
 	})
 
+	// HTTP Get method - alerts
+	r.Get("/classic/alerts", instrf("alerts", ins, q.alerts))
 	r.Get("/classic/graph", instrf("graph", ins, q.graph))
 	r.Get("/classic/stores", instrf("stores", ins, q.stores))
 	r.Get("/classic/status", instrf("status", ins, q.status))
@@ -87,6 +89,13 @@ func (q *Query) Register(r *route.Router, ins extpromhttp.InstrumentationMiddlew
 	// TODO(bplotka): Consider adding more Thanos related data e.g:
 	// - What store nodes we see currently.
 	// - What sidecars we see currently.
+}
+
+// alerts function
+func (q *Query) alerts(w http.ResponseWriter, r *http.Request) {
+	prefix := GetWebPrefix(q.logger, q.externalPrefix, q.prefixHeader, r)
+
+	q.executeTemplate(w, "alerts.html", prefix, nil)
 }
 
 func (q *Query) graph(w http.ResponseWriter, r *http.Request) {
